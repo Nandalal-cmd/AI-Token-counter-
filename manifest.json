@@ -1,0 +1,55 @@
+{
+  "manifest_version": 3,
+  "name": "AI Token Counter",
+  "version": "1.1.0",
+  "description": "Token used/remaining + AI-specific usage bar with reset timer",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png",
+    "256": "icons/icon256.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "action": {
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://claude.ai/*",
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://gemini.google.com/*",
+        "https://grok.com/*",
+        "https://grok.x.ai/*",
+        "https://x.com/*",
+        "https://kimi.com/*",
+        "https://kimi.moonshot.cn/*",
+        "https://perplexity.ai/*"
+      ],
+      "css": ["src/styles.css"],
+      "js": [
+        "src/content/constants.js",
+        "src/content/sites.js",
+        "src/content/bridge-client.js",
+        "src/vendor/o200k_base.js",
+        "src/content/tokens.js",
+        "src/content/ui.js",
+        "src/content/main.js"
+      ]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["src/content/bridge.js"],
+      "matches": ["https://*/*"]
+    }
+  ]
+}
