@@ -19,19 +19,34 @@ Never guess how close you are to your context limits again. The AI Token Counter
 * **Customizable Limits via UI**: Did you upgrade to a pro plan? Simply click the context limit number directly on your screen and drag your limit up to 1,000,000+! Custom profiles instantly sync mapped directly to your `.storage.local` environment.
 * **Persistent Session Memory (Lazy-Load Proof!)**: High-water-mark caching automatically remembers your longest conversational milestones on SPAs (Single Page Applications) so refreshing your browser tab will never accidentally reset your usage counter!
 
-## ⚙️ How to Install (Chrome / Edge / Brave)
+## ⚙️ How to Install & Run the Extension
 
-1. **Download/Clone this Repository**
-   Download the source folder or run:
-   ```bash
-   git clone https://github.com/your-username/ai-token-counter.git
-   ```
-2. **Access Extension Dashboard** 
-   Open your browser and navigate directly to your extensions panel by typing `chrome://extensions/` in the URL bar.
-3. **Enable Developer Mode** 
-   Flip the **Developer mode** toggle switch in the top right corner of the dashboard.
-4. **Load the Extension**
-   Click the **Load unpacked** button in the top left and select the folder you just downloaded containing the `manifest.json` file.
+Follow these simple steps to install the extension directly into your browser:
+
+### Step 1: Download the Project
+Download the source folder to your local system or clone this repository using Git:
+```bash
+git clone https://github.com/Nandalal-cmd/AI-Token-counter-.git
+```
+
+### Step 2: Access Extension Dashboard
+1. Open your browser (Google Chrome, Microsoft Edge, or Brave).
+2. Type `chrome://extensions/` into your URL address bar and press **Enter**.
+
+### Step 3: Enable Developer Mode
+In the top right corner of the Extensions dashboard, you will see a toggle switch labeled **Developer mode**. Click it to turn it **ON**.
+
+### Step 4: Load the Extension
+1. Once Developer Mode is enabled, three new buttons will appear in the top left corner.
+2. Click the **Load unpacked** button.
+3. A file browser window will pop up. Navigate to the folder you downloaded/cloned (`AI-Token-counter-`) and select it. 
+*(Make sure you select the folder containing the `manifest.json` file).*
+
+### Step 5: Pin & Run
+1. The AI Token Counter is now installed natively in your browser!
+2. Click the puzzle-piece icon 🧩 in the top right of your browser toolbar.
+3. Find **AI Token Counter** in the list and click the **Pin** 📌 icon to keep it visible.
+4. Navigate to any supported AI website (like Claude, Gemini, or ChatGPT). The token counter will automatically launch and place itself seamlessly below your chat input box in real-time!
 
 ## 💻 Tech Stack
 - Manifest V3 Architecture
