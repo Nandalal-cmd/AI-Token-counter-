@@ -35,11 +35,16 @@
 			this.site = CC.getCurrentSite();
 
 			// Header
-			this.headerContainer = document.createElement('div');
-			this.headerContainer.className = 'cc-header';
+		this.headerContainer = document.createElement('div');
+		this.headerContainer.className = 'cc-header';
 
-			this.tokenHeader = document.createElement('span');
-			this.cacheDisplay = document.createElement('span');
+		this.compactToggle = document.createElement('span');
+		this.compactToggle.className = 'cc-compact-toggle';
+		this.compactToggle.textContent = '−';
+		this.compactToggle.title = 'Toggle compact mode';
+
+		this.tokenHeader = document.createElement('span');
+		this.cacheDisplay = document.createElement('span');
 
 			// Usage Row
 			this.usageRow = document.createElement('div');
@@ -114,6 +119,7 @@
 				this.usageRow.classList.add('cc-floating-row');
 				document.body.appendChild(this.usageRow);
 			}
+			this.loadCompactState();
 		}
 
 		setConversationMetrics({ totalTokens = 0, cachedUntil = null, unsupported = false } = {}) {
@@ -138,7 +144,10 @@
 				const costDisplay = (prefs.showCost !== false && cost > 0.0001) ? ` ~${createCostHTML(cost)}` : '';
 				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}`;
 				this.headerContainer.innerHTML = '';
-				this.headerContainer.appendChild(this.tokenHeader);
+				this.headerContainer.appendChild(this.compactToggle);
+		this.headerContainer.appendChild(this.tokenHeader);
+
+		this.compactToggle.onclick = () => this.toggleCompact();
 
 				if (cachedUntil && Date.now() < cachedUntil) {
 					this.lastCacheMs = cachedUntil;
@@ -240,6 +249,29 @@
 					}
 				};
 			}
+		}
+
+		async toggleCompact() {
+			this.usageRow.classList.toggle('cc-collapsed');
+			this.compactToggle.textContent = this.usageRow.classList.contains('cc-collapsed') ? '+' : '−';
+			try {
+				const key = `cc_compact_${this.site.name}`;
+				const data = await chrome.storage.local.get('cc_compact_states');
+				const states = data.cc_compact_states || {};
+				states[this.site.name] = this.usageRow.classList.contains('cc-collapsed');
+				await chrome.storage.local.set({ cc_compact_states: states });
+			} catch (_) {}
+		}
+
+		async loadCompactState() {
+			try {
+				const data = await chrome.storage.local.get('cc_compact_states');
+				const states = data.cc_compact_states || {};
+				if (states[this.site.name]) {
+					this.usageRow.classList.add('cc-collapsed');
+					this.compactToggle.textContent = '+';
+				}
+			} catch (_) {}
 		}
 
 		setHistoryStats({ totalTokens = 0, conversations = 0 } = {}) {

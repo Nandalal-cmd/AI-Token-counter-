@@ -143,4 +143,36 @@
 }
 .cc-editable-cost {
 	font-variant-numeric: tabular-nums;
+}
+
+.cc-compact-toggle {
+	cursor: pointer;
+	display: inline-block;
+	width: 18px;
+	height: 18px;
+	line-height: 18px;
+	text-align: center;
+	border-radius: 3px;
+	font-size: 14px;
+	font-weight: 700;
+	margin-right: 4px;
+	user-select: none;
+	transition: background 0.15s;
+}
+.cc-compact-toggle:hover {
+	background: rgba(128, 128, 128, 0.2);
+}
+
+.cc-collapsed {
+	max-height: 0 !important;
+	padding: 0 12px !important;
+	margin: 0 auto !important;
+	overflow: hidden;
+	border: none !important;
+	opacity: 0;
+	transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+}
+.cc-usage-row {
+	transition: max-height 0.3s ease, padding 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+	overflow: hidden;
 }
