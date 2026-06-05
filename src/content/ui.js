@@ -114,6 +114,7 @@
 		}
 
 		setConversationMetrics({ totalTokens = 0, cachedUntil = null, unsupported = false } = {}) {
+			const prefs = CC.prefs || {};
 			const limit = this.site.contextLimit;
 			const used = Math.min(totalTokens, limit);
 			const pct = Math.min(100, Math.round((used / limit) * 100));
@@ -131,7 +132,7 @@
 				this.tokenBarFill.style.width = '0%';
 				this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
 			} else {
-				const costDisplay = cost > 0.0001 ? ` ~${createCostHTML(cost)}` : '';
+				const costDisplay = (prefs.showCost !== false && cost > 0.0001) ? ` ~${createCostHTML(cost)}` : '';
 				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.tokenHeader);
@@ -149,41 +150,48 @@
 
 				// Threshold warnings
 				const pctDecimal = pct / 100;
-				let thresholdLevel = 'ok';
-				let thresholdText = '';
-				let barColor = CC.COLORS.PROGRESS_FILL_DARK;
+				if (prefs.showThreshold !== false) {
+					let thresholdLevel = 'ok';
+					let thresholdText = '';
+					let barColor = CC.COLORS.PROGRESS_FILL_DARK;
 
-				if (pctDecimal >= CC.THRESHOLDS.DANGER) {
-					thresholdLevel = 'danger';
-					thresholdText = '⚠ DANGER';
-					barColor = CC.COLORS.RED_WARNING;
-				} else if (pctDecimal >= CC.THRESHOLDS.CRITICAL) {
-					thresholdLevel = 'critical';
-					thresholdText = '⚠ CRITICAL';
-					barColor = CC.COLORS.RED_WARNING;
-				} else if (pctDecimal >= CC.THRESHOLDS.WARN) {
-					thresholdLevel = 'warn';
-					thresholdText = '⚠ WARNING';
-					barColor = '#d4a017';
+					if (pctDecimal >= CC.THRESHOLDS.DANGER) {
+						thresholdLevel = 'danger';
+						thresholdText = '⚠ DANGER';
+						barColor = CC.COLORS.RED_WARNING;
+					} else if (pctDecimal >= CC.THRESHOLDS.CRITICAL) {
+						thresholdLevel = 'critical';
+						thresholdText = '⚠ CRITICAL';
+						barColor = CC.COLORS.RED_WARNING;
+					} else if (pctDecimal >= CC.THRESHOLDS.WARN) {
+						thresholdLevel = 'warn';
+						thresholdText = '⚠ WARNING';
+						barColor = '#d4a017';
+					}
+
+					this.tokenBarFill.style.background = barColor;
+					this.usageRow.className = `cc-usage-row cc-threshold-${thresholdLevel}`;
+					this.thresholdLabel.textContent = thresholdText;
+					this.thresholdLabel.style.display = thresholdText ? '' : 'none';
+
+					// Fire notification on new threshold breach
+					if (prefs.showNotifications !== false && thresholdLevel !== 'ok' && thresholdLevel !== this.lastThresholdLevel) {
+						this.lastThresholdLevel = thresholdLevel;
+						try {
+							const n = new Notification(`AI Token Counter — ${thresholdLevel.toUpperCase()}`, {
+								body: `${this.site.name}: ${pct}% context limit used (${used.toLocaleString()} / ${limit.toLocaleString()} tokens)`,
+								icon: chrome.runtime.getURL('icons/icon128.png')
+							});
+							setTimeout(() => n.close(), 5000);
+						} catch (_) {}
+					}
+					if (thresholdLevel === 'ok') this.lastThresholdLevel = null;
+				} else {
+					this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
+					this.usageRow.className = 'cc-usage-row';
+					this.thresholdLabel.textContent = '';
+					this.thresholdLabel.style.display = 'none';
 				}
-
-				this.tokenBarFill.style.background = barColor;
-				this.usageRow.className = `cc-usage-row cc-threshold-${thresholdLevel}`;
-				this.thresholdLabel.textContent = thresholdText;
-				this.thresholdLabel.style.display = thresholdText ? '' : 'none';
-
-				// Fire notification on new threshold breach
-				if (thresholdLevel !== 'ok' && thresholdLevel !== this.lastThresholdLevel) {
-					this.lastThresholdLevel = thresholdLevel;
-					try {
-						const n = new Notification(`AI Token Counter — ${thresholdLevel.toUpperCase()}`, {
-							body: `${this.site.name}: ${pct}% context limit used (${used.toLocaleString()} / ${limit.toLocaleString()} tokens)`,
-							icon: chrome.runtime.getURL('icons/icon128.png')
-						});
-						setTimeout(() => n.close(), 5000);
-					} catch (_) {}
-				}
-				if (thresholdLevel === 'ok') this.lastThresholdLevel = null;
 			}
 			
 			// Attach listener to editable limit

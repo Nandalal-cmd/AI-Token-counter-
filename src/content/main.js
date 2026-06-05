@@ -8,6 +8,14 @@
 	// Load limits asynchronously from storage
 	await CC.getCurrentSiteAsync();
 
+	// Load preferences
+	try {
+		const prefData = await chrome.storage.local.get('cc_preferences');
+		CC.prefs = prefData.cc_preferences || {};
+	} catch (_) {
+		CC.prefs = {};
+	}
+
 	const ui = new CC.ui.CounterUI();
 	ui.initialize();
 
