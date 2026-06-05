@@ -58,7 +58,10 @@
 			this.tokenBarFill.className = 'cc-bar-fill';
 			tokenBarContainer.appendChild(this.tokenBarFill);
 
-			this.usageRow.append(this.tokenInfo, tokenBarContainer, this.thresholdLabel);
+			this.historyDisplay = document.createElement('span');
+		this.historyDisplay.className = 'cc-history-info';
+
+		this.usageRow.append(this.tokenInfo, tokenBarContainer, this.thresholdLabel, this.historyDisplay);
 		}
 
 		attachHeader() {
@@ -236,6 +239,15 @@
 						}
 					}
 				};
+			}
+		}
+
+		setHistoryStats({ totalTokens = 0, conversations = 0 } = {}) {
+			if (totalTokens > 0) {
+				this.historyDisplay.textContent = `Today: ${totalTokens.toLocaleString()} tokens (${conversations} convos)`;
+				this.historyDisplay.style.display = '';
+			} else {
+				this.historyDisplay.style.display = 'none';
 			}
 		}
 

@@ -200,6 +200,48 @@
 	// Initial load
 	handleUrlChange();
 
+	// Usage history tracking
+	async function trackUsage(tokens) {
+		if (!tokens) return;
+		try {
+			const today = new Date().toISOString().slice(0, 10);
+			const site = CC.getCurrentSite().name;
+			const data = await chrome.storage.local.get('cc_usage_history');
+			const history = data.cc_usage_history || {};
+			if (!history[today]) history[today] = {};
+			if (!history[today][site]) history[today][site] = { tokens: 0, conversations: 0 };
+			history[today][site].tokens = Math.max(history[today][site].tokens, tokens);
+			history[today][site].conversations++;
+			await chrome.storage.local.set({ cc_usage_history: history });
+			updateHistoryDisplay();
+		} catch (_) {}
+	}
+
+	async function updateHistoryDisplay() {
+		try {
+			const today = new Date().toISOString().slice(0, 10);
+			const data = await chrome.storage.local.get('cc_usage_history');
+			const history = data.cc_usage_history || {};
+			const todayData = history[today];
+			if (todayData) {
+				let totalTokens = 0;
+				let totalConvs = 0;
+				for (const siteData of Object.values(todayData)) {
+					totalTokens += siteData.tokens || 0;
+					totalConvs += siteData.conversations || 0;
+				}
+				ui.setHistoryStats({ totalTokens, conversations: totalConvs });
+			}
+		} catch (_) {}
+	}
+
+	// Track after each metric update
+	const origSetMetrics = ui.setConversationMetrics.bind(ui);
+	ui.setConversationMetrics = (metrics) => {
+		origSetMetrics(metrics);
+		if (metrics && metrics.totalTokens) trackUsage(metrics.totalTokens);
+	};
+
 	// Real-time tick for cache timer
 	setInterval(() => {
 		ui.tick();

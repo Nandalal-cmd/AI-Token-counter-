@@ -43,6 +43,14 @@
 	color: var(--text-100);
 }
 
+.cc-history-info {
+	font-size: 11px;
+	color: var(--text-400, #888);
+	white-space: nowrap;
+	margin-left: auto;
+	opacity: 0.8;
+}
+
 .cc-floating-header {
 	position: fixed;
 	bottom: 20px;
