@@ -87,6 +87,39 @@
 	width: 100%;
 }
 
+.cc-threshold-label {
+	font-weight: 700;
+	font-size: 11px;
+	white-space: nowrap;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.cc-threshold-warn {
+	border: 1px solid #d4a017;
+}
+.cc-threshold-warn .cc-threshold-label {
+	color: #d4a017;
+}
+.cc-threshold-critical {
+	border: 1px solid #ce2029;
+	animation: cc-pulse 2s ease-in-out infinite;
+}
+.cc-threshold-critical .cc-threshold-label {
+	color: #ce2029;
+}
+.cc-threshold-danger {
+	border: 2px solid #ce2029;
+	background: rgba(206, 32, 41, 0.12) !important;
+	animation: cc-pulse 1s ease-in-out infinite;
+}
+.cc-threshold-danger .cc-threshold-label {
+	color: #ce2029;
+}
+@keyframes cc-pulse {
+	0%, 100% { opacity: 1; }
+	50% { opacity: 0.6; }
+}
+
 .cc-editable-limit,
 .cc-editable-cost {
 	cursor: pointer;

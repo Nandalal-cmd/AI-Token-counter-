@@ -16,4 +16,10 @@
 		BOLD_LIGHT: '#141413',
 		BOLD_DARK: '#faf9f5'
 	});
+
+	CC.THRESHOLDS = Object.freeze({
+		WARN: 0.80,
+		CRITICAL: 0.90,
+		DANGER: 0.95
+	});
 })();

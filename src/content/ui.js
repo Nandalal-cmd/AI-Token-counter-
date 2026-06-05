@@ -28,6 +28,7 @@
 			this.aiBarFill = null;
 			this.lastCacheMs = null;
 			this.site = null;
+			this.lastThresholdLevel = null;
 		}
 
 		initialize() {
@@ -48,13 +49,16 @@
 			this.tokenInfo = document.createElement('span');
 			this.tokenInfo.className = 'cc-token-info';
 
+			this.thresholdLabel = document.createElement('span');
+			this.thresholdLabel.className = 'cc-threshold-label';
+
 			const tokenBarContainer = document.createElement('div');
 			tokenBarContainer.className = 'cc-bar';
 			this.tokenBarFill = document.createElement('div');
 			this.tokenBarFill.className = 'cc-bar-fill';
 			tokenBarContainer.appendChild(this.tokenBarFill);
 
-			this.usageRow.append(this.tokenInfo, tokenBarContainer);
+			this.usageRow.append(this.tokenInfo, tokenBarContainer, this.thresholdLabel);
 		}
 
 		attachHeader() {
@@ -142,7 +146,44 @@
 				// Token Used / Remaining
 				this.tokenInfo.innerHTML = `Tokens: ${used.toLocaleString()} / ${createLimitHTML(limit)}`;
 				this.tokenBarFill.style.width = `${pct}%`;
-				this.tokenBarFill.style.background = pct >= 90 ? CC.COLORS.RED_WARNING : CC.COLORS.PROGRESS_FILL_DARK;
+
+				// Threshold warnings
+				const pctDecimal = pct / 100;
+				let thresholdLevel = 'ok';
+				let thresholdText = '';
+				let barColor = CC.COLORS.PROGRESS_FILL_DARK;
+
+				if (pctDecimal >= CC.THRESHOLDS.DANGER) {
+					thresholdLevel = 'danger';
+					thresholdText = '⚠ DANGER';
+					barColor = CC.COLORS.RED_WARNING;
+				} else if (pctDecimal >= CC.THRESHOLDS.CRITICAL) {
+					thresholdLevel = 'critical';
+					thresholdText = '⚠ CRITICAL';
+					barColor = CC.COLORS.RED_WARNING;
+				} else if (pctDecimal >= CC.THRESHOLDS.WARN) {
+					thresholdLevel = 'warn';
+					thresholdText = '⚠ WARNING';
+					barColor = '#d4a017';
+				}
+
+				this.tokenBarFill.style.background = barColor;
+				this.usageRow.className = `cc-usage-row cc-threshold-${thresholdLevel}`;
+				this.thresholdLabel.textContent = thresholdText;
+				this.thresholdLabel.style.display = thresholdText ? '' : 'none';
+
+				// Fire notification on new threshold breach
+				if (thresholdLevel !== 'ok' && thresholdLevel !== this.lastThresholdLevel) {
+					this.lastThresholdLevel = thresholdLevel;
+					try {
+						const n = new Notification(`AI Token Counter — ${thresholdLevel.toUpperCase()}`, {
+							body: `${this.site.name}: ${pct}% context limit used (${used.toLocaleString()} / ${limit.toLocaleString()} tokens)`,
+							icon: chrome.runtime.getURL('icons/icon128.png')
+						});
+						setTimeout(() => n.close(), 5000);
+					} catch (_) {}
+				}
+				if (thresholdLevel === 'ok') this.lastThresholdLevel = null;
 			}
 			
 			// Attach listener to editable limit
