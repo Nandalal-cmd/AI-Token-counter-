@@ -87,14 +87,19 @@
 	width: 100%;
 }
 
-.cc-editable-limit {
+.cc-editable-limit,
+.cc-editable-cost {
 	cursor: pointer;
 	text-decoration: underline;
 	text-decoration-style: dotted;
 	text-underline-offset: 3px;
 	transition: color 0.15s ease;
 }
-.cc-editable-limit:hover {
+.cc-editable-limit:hover,
+.cc-editable-cost:hover {
 	color: var(--text-200, #fff);
 	text-decoration-style: solid;
+}
+.cc-editable-cost {
+	font-variant-numeric: tabular-nums;
 }

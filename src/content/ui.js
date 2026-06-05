@@ -113,8 +113,10 @@
 			const limit = this.site.contextLimit;
 			const used = Math.min(totalTokens, limit);
 			const pct = Math.min(100, Math.round((used / limit) * 100));
+			const cost = (used / 1000) * (this.site.costPer1k || 0.01);
 
 			const createLimitHTML = (l) => `<span class="cc-editable-limit" title="Click to edit max context limit">${l.toLocaleString()}</span>`;
+			const createCostHTML = (c) => `<span class="cc-editable-cost" title="Click to edit cost per 1K tokens">$${c.toFixed(4)}</span>`;
 
 			// Header
 			if (unsupported) {
@@ -125,7 +127,8 @@
 				this.tokenBarFill.style.width = '0%';
 				this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
 			} else {
-				this.tokenHeader.textContent = `~${used.toLocaleString()} tokens`;
+				const costDisplay = cost > 0.0001 ? ` ~${createCostHTML(cost)}` : '';
+				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.tokenHeader);
 
@@ -155,6 +158,29 @@
 								overrides[this.site.name] = newLimit;
 								chrome.storage.local.set({ cc_custom_limits: overrides }, () => {
 									this.site.contextLimit = newLimit;
+									this.setConversationMetrics({ totalTokens, cachedUntil, unsupported });
+								});
+							});
+						}
+					}
+				};
+			}
+
+			// Attach listener to editable cost
+			const editCost = this.tokenHeader.querySelector('.cc-editable-cost');
+			if (editCost) {
+				editCost.onclick = (e) => {
+					e.stopPropagation();
+					const currentRate = this.site.costPer1k || 0.01;
+					const newRateStr = prompt(`Enter cost per 1,000 tokens for ${this.site.name} (e.g. 0.015):`, currentRate);
+					if (newRateStr !== null) {
+						const newRate = parseFloat(newRateStr);
+						if (!isNaN(newRate) && newRate >= 0) {
+							chrome.storage.local.get('cc_custom_pricing', (data) => {
+								const pricing = data.cc_custom_pricing || {};
+								pricing[this.site.name] = newRate;
+								chrome.storage.local.set({ cc_custom_pricing: pricing }, () => {
+									this.site.costPer1k = newRate;
 									this.setConversationMetrics({ totalTokens, cachedUntil, unsupported });
 								});
 							});
