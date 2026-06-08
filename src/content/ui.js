@@ -54,10 +54,13 @@
 			this.tokenInfo = document.createElement('span');
 			this.tokenInfo.className = 'cc-token-info';
 
-			this.thresholdLabel = document.createElement('span');
-			this.thresholdLabel.className = 'cc-threshold-label';
+		this.thresholdLabel = document.createElement('span');
+		this.thresholdLabel.className = 'cc-threshold-label';
 
-			const tokenBarContainer = document.createElement('div');
+		this.presetsContainer = document.createElement('span');
+		this.presetsContainer.className = 'cc-presets';
+
+		const tokenBarContainer = document.createElement('div');
 			tokenBarContainer.className = 'cc-bar';
 			this.tokenBarFill = document.createElement('div');
 			this.tokenBarFill.className = 'cc-bar-fill';
@@ -66,7 +69,7 @@
 			this.historyDisplay = document.createElement('span');
 		this.historyDisplay.className = 'cc-history-info';
 
-		this.usageRow.append(this.tokenInfo, tokenBarContainer, this.thresholdLabel, this.historyDisplay);
+		this.usageRow.append(this.tokenInfo, tokenBarContainer, this.thresholdLabel, this.presetsContainer, this.historyDisplay);
 		}
 
 		attachHeader() {
@@ -209,6 +212,27 @@
 				}
 			}
 			
+			// Render limit presets
+			const presets = CC.LIMIT_PRESETS[this.site.name] || CC.LIMIT_PRESETS['AI'];
+			this.presetsContainer.innerHTML = '';
+			for (const p of presets) {
+				const pill = document.createElement('span');
+				pill.className = 'cc-preset-pill' + (p === limit ? ' cc-preset-active' : '');
+				pill.textContent = (p / 1000).toFixed(0) + 'K';
+				pill.title = `Switch to ${p.toLocaleString()} limit`;
+				pill.onclick = () => {
+					chrome.storage.local.get('cc_custom_limits', (data) => {
+						const overrides = data.cc_custom_limits || {};
+						overrides[this.site.name] = p;
+						chrome.storage.local.set({ cc_custom_limits: overrides }, () => {
+							this.site.contextLimit = p;
+							this.setConversationMetrics({ totalTokens, userTokens, assistantTokens, charCount, wordCount, cachedUntil, unsupported });
+						});
+					});
+				};
+				this.presetsContainer.appendChild(pill);
+			}
+
 			// Attach listener to editable limit
 			const editSpan = this.tokenInfo.querySelector('.cc-editable-limit');
 			if (editSpan) {

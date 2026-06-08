@@ -163,6 +163,32 @@
 	background: rgba(128, 128, 128, 0.2);
 }
 
+.cc-presets {
+	display: flex;
+	gap: 4px;
+	align-items: center;
+	margin-left: 4px;
+}
+.cc-preset-pill {
+	cursor: pointer;
+	padding: 1px 6px;
+	font-size: 10px;
+	border-radius: 3px;
+	background: rgba(128, 128, 128, 0.15);
+	color: var(--text-400, #999);
+	transition: background 0.15s, color 0.15s;
+	font-weight: 600;
+	letter-spacing: 0.3px;
+}
+.cc-preset-pill:hover {
+	background: rgba(44, 132, 219, 0.3);
+	color: var(--text-200, #ddd);
+}
+.cc-preset-active {
+	background: rgba(44, 132, 219, 0.4) !important;
+	color: #5aa6ff !important;
+}
+
 .cc-collapsed {
 	max-height: 0 !important;
 	padding: 0 12px !important;

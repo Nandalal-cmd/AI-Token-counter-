@@ -22,4 +22,14 @@
 		CRITICAL: 0.90,
 		DANGER: 0.95
 	});
+
+	CC.LIMIT_PRESETS = Object.freeze({
+		'Claude':     [100000, 200000],
+		'ChatGPT':    [32000, 128000],
+		'Gemini':     [200000, 1000000],
+		'Grok':       [131072],
+		'Kimi':       [200000, 2000000],
+		'Perplexity': [200000],
+		'AI':         [200000]
+	});
 })();
