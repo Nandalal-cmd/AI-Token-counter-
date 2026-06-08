@@ -122,7 +122,7 @@
 			this.loadCompactState();
 		}
 
-		setConversationMetrics({ totalTokens = 0, charCount = 0, wordCount = 0, cachedUntil = null, unsupported = false } = {}) {
+		setConversationMetrics({ totalTokens = 0, userTokens = 0, assistantTokens = 0, charCount = 0, wordCount = 0, cachedUntil = null, unsupported = false } = {}) {
 			const prefs = CC.prefs || {};
 			const limit = this.site.contextLimit;
 			const used = Math.min(totalTokens, limit);
@@ -144,7 +144,8 @@
 				this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
 			} else {
 				const costDisplay = (prefs.showCost !== false && cost > 0.0001) ? ` ~${createCostHTML(cost)}` : '';
-				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}${textStats}`;
+				const roleBreakdown = (userTokens > 0 || assistantTokens > 0) ? ` [U: ${userTokens.toLocaleString()} | A: ${assistantTokens.toLocaleString()}]` : '';
+				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}${roleBreakdown}${textStats}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.compactToggle);
 		this.headerContainer.appendChild(this.tokenHeader);

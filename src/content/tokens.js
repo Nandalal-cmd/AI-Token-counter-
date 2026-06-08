@@ -68,6 +68,8 @@
 		let totalTokens = 0;
 		let charCount = 0;
 		let wordCount = 0;
+		let userTokens = 0;
+		let assistantTokens = 0;
 		let lastAssistantMs = null;
 
 		for (const msg of trunk) {
@@ -77,14 +79,18 @@
 			}
 
 			const text = stringifyMessage(msg);
-			totalTokens += countTokens(text);
+			const tokens = countTokens(text);
+			totalTokens += tokens;
 			charCount += text.length;
 			wordCount += text.split(/\s+/).filter(Boolean).length;
+
+			if (msg.sender === 'user') userTokens += tokens;
+			else if (msg.sender === 'assistant') assistantTokens += tokens;
 		}
 
 		const cachedUntil = lastAssistantMs ? lastAssistantMs + (5 * 60 * 1000) : null;
 
-		return { totalTokens, charCount, wordCount, cachedUntil };
+		return { totalTokens, userTokens, assistantTokens, charCount, wordCount, cachedUntil };
 	}
 
 	CC.tokens = { computeConversationMetrics, countTokens };
