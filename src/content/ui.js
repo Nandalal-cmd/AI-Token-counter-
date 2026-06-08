@@ -152,8 +152,15 @@
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.compactToggle);
 		this.headerContainer.appendChild(this.tokenHeader);
+		this.headerContainer.appendChild(this.exportBtn);
 
 		this.compactToggle.onclick = () => this.toggleCompact();
+
+		this.exportBtn = document.createElement('span');
+		this.exportBtn.className = 'cc-export-btn';
+		this.exportBtn.textContent = '⬇';
+		this.exportBtn.title = 'Export usage data';
+		this.exportBtn.onclick = () => this.exportData();
 
 				if (cachedUntil && Date.now() < cachedUntil) {
 					this.lastCacheMs = cachedUntil;
@@ -275,6 +282,34 @@
 						}
 					}
 				};
+			}
+		}
+
+		async exportData() {
+			try {
+				const data = await chrome.storage.local.get(null);
+				const report = {
+					exportedAt: new Date().toISOString(),
+					site: this.site.name,
+					currentLimit: this.site.contextLimit,
+					currentCostPer1k: this.site.costPer1k,
+					siteConfig: this.site,
+					customLimits: data.cc_custom_limits || {},
+					customPricing: data.cc_custom_pricing || {},
+					usageHistory: data.cc_usage_history || {},
+					preferences: data.cc_preferences || {}
+				};
+				const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `ai-token-counter-${this.site.name}-${new Date().toISOString().slice(0, 10)}.json`;
+				document.body.appendChild(a);
+				a.click();
+				document.body.removeChild(a);
+				URL.revokeObjectURL(url);
+			} catch (e) {
+				console.warn('[AI Token Counter] Export failed:', e);
 			}
 		}
 

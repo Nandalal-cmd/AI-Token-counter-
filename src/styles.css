@@ -145,6 +145,19 @@
 	font-variant-numeric: tabular-nums;
 }
 
+.cc-export-btn {
+	cursor: pointer;
+	margin-left: auto;
+	padding: 0 4px;
+	font-size: 13px;
+	opacity: 0.5;
+	transition: opacity 0.15s;
+	user-select: none;
+}
+.cc-export-btn:hover {
+	opacity: 1;
+}
+
 .cc-compact-toggle {
 	cursor: pointer;
 	display: inline-block;
