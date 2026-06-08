@@ -90,7 +90,11 @@
 			
 		} catch(e) { /* ignore storage errors */ }
 
-		ui.setConversationMetrics({ totalTokens: tokens });
+		ui.setConversationMetrics({
+			totalTokens: tokens,
+			charCount: mainText.length,
+			wordCount: mainText.split(/\s+/).filter(Boolean).length
+		});
 	}
 
 	// Listen to user typing natively for immediate updates

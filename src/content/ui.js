@@ -122,7 +122,7 @@
 			this.loadCompactState();
 		}
 
-		setConversationMetrics({ totalTokens = 0, cachedUntil = null, unsupported = false } = {}) {
+		setConversationMetrics({ totalTokens = 0, charCount = 0, wordCount = 0, cachedUntil = null, unsupported = false } = {}) {
 			const prefs = CC.prefs || {};
 			const limit = this.site.contextLimit;
 			const used = Math.min(totalTokens, limit);
@@ -131,6 +131,8 @@
 
 			const createLimitHTML = (l) => `<span class="cc-editable-limit" title="Click to edit max context limit">${l.toLocaleString()}</span>`;
 			const createCostHTML = (c) => `<span class="cc-editable-cost" title="Click to edit cost per 1K tokens">$${c.toFixed(4)}</span>`;
+
+			const textStats = (charCount > 0) ? ` | ${charCount.toLocaleString()} chars | ${wordCount.toLocaleString()} words` : '';
 
 			// Header
 			if (unsupported) {
@@ -142,7 +144,7 @@
 				this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
 			} else {
 				const costDisplay = (prefs.showCost !== false && cost > 0.0001) ? ` ~${createCostHTML(cost)}` : '';
-				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}`;
+				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}${textStats}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.compactToggle);
 		this.headerContainer.appendChild(this.tokenHeader);

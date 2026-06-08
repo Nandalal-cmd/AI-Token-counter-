@@ -66,6 +66,8 @@
 	async function computeConversationMetrics(conversation) {
 		const trunk = buildTrunk(conversation);
 		let totalTokens = 0;
+		let charCount = 0;
+		let wordCount = 0;
 		let lastAssistantMs = null;
 
 		for (const msg of trunk) {
@@ -76,11 +78,13 @@
 
 			const text = stringifyMessage(msg);
 			totalTokens += countTokens(text);
+			charCount += text.length;
+			wordCount += text.split(/\s+/).filter(Boolean).length;
 		}
 
 		const cachedUntil = lastAssistantMs ? lastAssistantMs + (5 * 60 * 1000) : null;
 
-		return { totalTokens, cachedUntil };
+		return { totalTokens, charCount, wordCount, cachedUntil };
 	}
 
 	CC.tokens = { computeConversationMetrics, countTokens };
