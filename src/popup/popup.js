@@ -46,14 +46,19 @@
 
 	// Load saved settings
 	try {
-		const data = await chrome.storage.local.get(['cc_custom_limits', 'cc_custom_pricing', 'cc_preferences']);
+		const data = await chrome.storage.local.get(['cc_custom_limits', 'cc_custom_pricing', 'cc_preferences', 'cc_custom_colors']);
 		const limits = data.cc_custom_limits || {};
 		const pricing = data.cc_custom_pricing || {};
 		const prefs = data.cc_preferences || {};
+		const colors = data.cc_custom_colors || {};
 
 		if (prefs.showCost !== undefined) document.getElementById('toggleCost').checked = prefs.showCost;
 		if (prefs.showThreshold !== undefined) document.getElementById('toggleThreshold').checked = prefs.showThreshold;
 		if (prefs.showNotifications !== undefined) document.getElementById('toggleNotifications').checked = prefs.showNotifications;
+
+		if (colors.normal) document.getElementById('colorNormal').value = colors.normal;
+		if (colors.warn) document.getElementById('colorWarn').value = colors.warn;
+		if (colors.critical) document.getElementById('colorCritical').value = colors.critical;
 
 		for (const name of SITE_NAMES) {
 			const limInput = document.querySelector(`#limits-container input[data-site="${name}"]`);
@@ -91,10 +96,17 @@
 				showNotifications: document.getElementById('toggleNotifications').checked
 			};
 
+			const colors = {
+				normal: document.getElementById('colorNormal').value,
+				warn: document.getElementById('colorWarn').value,
+				critical: document.getElementById('colorCritical').value
+			};
+
 			await chrome.storage.local.set({
 				cc_custom_limits: limits,
 				cc_custom_pricing: pricing,
-				cc_preferences: prefs
+				cc_preferences: prefs,
+				cc_custom_colors: colors
 			});
 
 			const status = document.getElementById('status');
@@ -108,12 +120,15 @@
 	// Reset to defaults
 	document.getElementById('resetBtn').addEventListener('click', async () => {
 		try {
-			await chrome.storage.local.remove(['cc_custom_limits', 'cc_custom_pricing', 'cc_preferences']);
+			await chrome.storage.local.remove(['cc_custom_limits', 'cc_custom_pricing', 'cc_preferences', 'cc_custom_colors']);
 			renderContainer('limits-container', 'limit', formatLimit);
 			renderContainer('pricing-container', 'cost', formatCost);
 			document.getElementById('toggleCost').checked = true;
 			document.getElementById('toggleThreshold').checked = true;
 			document.getElementById('toggleNotifications').checked = true;
+			document.getElementById('colorNormal').value = '#2c84db';
+			document.getElementById('colorWarn').value = '#d4a017';
+			document.getElementById('colorCritical').value = '#ce2029';
 			document.getElementById('status').textContent = 'Reset to defaults.';
 			setTimeout(() => { document.getElementById('status').textContent = ''; }, 2000);
 		} catch (e) {

@@ -42,6 +42,13 @@
 		this.compactToggle.className = 'cc-compact-toggle';
 		this.compactToggle.textContent = '−';
 		this.compactToggle.title = 'Toggle compact mode';
+		this.compactToggle.onclick = () => this.toggleCompact();
+
+		this.exportBtn = document.createElement('span');
+		this.exportBtn.className = 'cc-export-btn';
+		this.exportBtn.textContent = '⬇';
+		this.exportBtn.title = 'Export usage data';
+		this.exportBtn.onclick = () => this.exportData();
 
 		this.tokenHeader = document.createElement('span');
 		this.cacheDisplay = document.createElement('span');
@@ -138,29 +145,26 @@
 			const textStats = (charCount > 0) ? ` | ${charCount.toLocaleString()} chars | ${wordCount.toLocaleString()} words` : '';
 
 			// Header
+			const colData = (this._customColors || {});
+			const colNormal = colData.normal || CC.COLORS.PROGRESS_FILL_DARK;
+			const colWarn = colData.warn || '#d4a017';
+			const colCritical = colData.critical || CC.COLORS.RED_WARNING;
+
 			if (unsupported) {
 				this.tokenHeader.textContent = `Live token count not available for ${this.site.name}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.tokenHeader);
 				this.tokenInfo.innerHTML = `Context limit: ${createLimitHTML(limit)} tokens`;
 				this.tokenBarFill.style.width = '0%';
-				this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
+				this.tokenBarFill.style.background = colNormal;
 			} else {
 				const costDisplay = (prefs.showCost !== false && cost > 0.0001) ? ` ~${createCostHTML(cost)}` : '';
 				const roleBreakdown = (userTokens > 0 || assistantTokens > 0) ? ` [U: ${userTokens.toLocaleString()} | A: ${assistantTokens.toLocaleString()}]` : '';
 				this.tokenHeader.innerHTML = `~${used.toLocaleString()} tokens${costDisplay}${roleBreakdown}${textStats}`;
 				this.headerContainer.innerHTML = '';
 				this.headerContainer.appendChild(this.compactToggle);
-		this.headerContainer.appendChild(this.tokenHeader);
-		this.headerContainer.appendChild(this.exportBtn);
-
-		this.compactToggle.onclick = () => this.toggleCompact();
-
-		this.exportBtn = document.createElement('span');
-		this.exportBtn.className = 'cc-export-btn';
-		this.exportBtn.textContent = '⬇';
-		this.exportBtn.title = 'Export usage data';
-		this.exportBtn.onclick = () => this.exportData();
+				this.headerContainer.appendChild(this.tokenHeader);
+				this.headerContainer.appendChild(this.exportBtn);
 
 				if (cachedUntil && Date.now() < cachedUntil) {
 					this.lastCacheMs = cachedUntil;
@@ -173,25 +177,36 @@
 				this.tokenInfo.innerHTML = `Tokens: ${used.toLocaleString()} / ${createLimitHTML(limit)}`;
 				this.tokenBarFill.style.width = `${pct}%`;
 
+				// Load custom colors from storage (async)
+				if (!this._colorsLoaded) {
+					this._colorsLoaded = true;
+					(async () => {
+						try {
+							const d = await chrome.storage.local.get('cc_custom_colors');
+							this._customColors = d.cc_custom_colors || {};
+						} catch (_) {}
+					})();
+				}
+
 				// Threshold warnings
 				const pctDecimal = pct / 100;
 				if (prefs.showThreshold !== false) {
 					let thresholdLevel = 'ok';
 					let thresholdText = '';
-					let barColor = CC.COLORS.PROGRESS_FILL_DARK;
+					let barColor = colNormal;
 
 					if (pctDecimal >= CC.THRESHOLDS.DANGER) {
 						thresholdLevel = 'danger';
 						thresholdText = '⚠ DANGER';
-						barColor = CC.COLORS.RED_WARNING;
+						barColor = colCritical;
 					} else if (pctDecimal >= CC.THRESHOLDS.CRITICAL) {
 						thresholdLevel = 'critical';
 						thresholdText = '⚠ CRITICAL';
-						barColor = CC.COLORS.RED_WARNING;
+						barColor = colCritical;
 					} else if (pctDecimal >= CC.THRESHOLDS.WARN) {
 						thresholdLevel = 'warn';
 						thresholdText = '⚠ WARNING';
-						barColor = '#d4a017';
+						barColor = colWarn;
 					}
 
 					this.tokenBarFill.style.background = barColor;
@@ -212,7 +227,7 @@
 					}
 					if (thresholdLevel === 'ok') this.lastThresholdLevel = null;
 				} else {
-					this.tokenBarFill.style.background = CC.COLORS.PROGRESS_FILL_DARK;
+					this.tokenBarFill.style.background = colNormal;
 					this.usageRow.className = 'cc-usage-row';
 					this.thresholdLabel.textContent = '';
 					this.thresholdLabel.style.display = 'none';
